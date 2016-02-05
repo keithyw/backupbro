@@ -1,0 +1,11 @@
+<template name="women">
+    {{#if isSubReady 'women'}}
+        {{#each getWomen}}
+            <p>
+                Name {{name}}
+            </p>
+        {{/each}}
+    {{else}}
+        Loading...
+    {{/if}}
+</template>

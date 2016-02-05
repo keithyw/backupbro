@@ -1,0 +1,67 @@
+Women = new Mongo.Collection('women');
+
+if (Meteor.isClient) {
+  // counter starts at 0
+  Session.setDefault('counter', 0);
+  Meteor.subscribe("women");
+
+  Template.hello.helpers({
+    counter: function () {
+      return Session.get('counter');
+    }
+  });
+
+  Template.body.helpers({
+    women: function(){
+      return Women.find({}, {sort: {createdAt: -1}});
+    }
+  });
+
+  Template.hello.events({
+    'click button': function () {
+      // increment the counter when button is clicked
+      Session.set('counter', Session.get('counter') + 1);
+    }
+  });
+
+  Template.body.events({
+     'submit .new-woman': function(e){
+         e.preventDefault();
+         Meteor.call('addWoman', e.target.name.value);
+         e.target.name.value = '';
+     }
+  });
+
+  Template.woman.events({
+    'click .delete': function(){
+        Meteor.call('deleteWoman', this._id);
+    }
+  });
+
+  Accounts.ui.config({
+    passwordSignupFields: "USERNAME_ONLY"
+  });
+}
+
+Meteor.methods({
+    addWoman: function(name){
+      if (!Meteor.userId()){
+        throw new Meteor.Error("not-authorized");
+      }
+    Women.insert({ name: name, createdAt: new Date()});
+    },
+
+    deleteWoman: function(id){
+      Women.remove(id);
+    }
+});
+
+if (Meteor.isServer) {
+  Meteor.publish('women', function(){
+    return Women.find();
+  });
+
+  Meteor.startup(function () {
+    // code to run on server at startup
+  });
+}
